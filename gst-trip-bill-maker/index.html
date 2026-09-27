@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GST Trip Bill Maker</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+</head>
+<body>
+    <header class="app-header no-print">
+        <div class="container">
+            <p class="business-name" id="display-business-name">Honeymoon Trip Planner</p>
+            <h1 class="app-title">GST Trip Bill Maker</h1>
+        </div>
+    </header>
+
+    <nav class="tabs no-print">
+        <div class="container">
+            <button class="tab-btn active" data-tab="new-invoice">New Invoice</button>
+            <button class="tab-btn" data-tab="saved-invoices">Saved Invoices</button>
+            <button class="tab-btn" data-tab="settings">Settings</button>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- New Invoice Section -->
+        <section id="new-invoice" class="tab-content active no-print">
+            <form id="invoice-form">
+                <div class="card">
+                    <h2>Client Details</h2>
+                    <div class="form-group">
+                        <label for="client-name">Client Name</label>
+                        <input type="text" id="client-name" required placeholder="E.g. Rahul & Priya">
+                    </div>
+                    <div class="form-group">
+                        <label for="client-address">Client Address</label>
+                        <textarea id="client-address" placeholder="Client's full address"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="destination">Destination</label>
+                        <input type="text" id="destination" placeholder="E.g. Maldives Honeymoon Package">
+                    </div>
+                    <div class="form-group">
+                        <label for="invoice-date">Invoice Date</label>
+                        <input type="date" id="invoice-date" required>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Itemized Billing</h2>
+                    <div class="table-responsive">
+                        <table id="items-table">
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th>Rate (₹)</th>
+                                    <th>Qty</th>
+                                    <th>Amount (₹)</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="items-body">
+                                <!-- Items will be dynamically added here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <button type="button" id="add-item-btn" class="btn secondary">➕ Add Item</button>
+                </div>
+
+                <div class="card">
+                    <h2>Tax & Totals</h2>
+                    <div class="form-group">
+                        <label for="gst-type">GST Type</label>
+                        <select id="gst-type">
+                            <option value="cgst-sgst">CGST + SGST (Local)</option>
+                            <option value="igst">IGST (Interstate)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="gst-rate">GST Rate (%)</label>
+                        <select id="gst-rate">
+                            <option value="5">5%</option>
+                            <option value="12">12%</option>
+                            <option value="18" selected>18%</option>
+                            <option value="28">28%</option>
+                        </select>
+                    </div>
+
+                    <div class="totals-summary">
+                        <div class="summary-row">
+                            <span>Subtotal:</span>
+                            <span id="subtotal-display">₹ 0.00</span>
+                        </div>
+                        <div class="summary-row gst-breakdown" id="cgst-row">
+                            <span>CGST:</span>
+                            <span id="cgst-display">₹ 0.00</span>
+                        </div>
+                        <div class="summary-row gst-breakdown" id="sgst-row">
+                            <span>SGST:</span>
+                            <span id="sgst-display">₹ 0.00</span>
+                        </div>
+                        <div class="summary-row gst-breakdown hidden" id="igst-row">
+                            <span>IGST:</span>
+                            <span id="igst-display">₹ 0.00</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Total Amount:</span>
+                            <span id="total-display">₹ 0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <button type="button" id="preview-btn" class="btn primary">Preview & Print</button>
+                    <button type="button" id="save-invoice-btn" class="btn secondary">Save Invoice</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Print/Preview Section (Visible only on print or when previewing) -->
+        <section id="invoice-preview" class="hidden print-only">
+            <div class="print-actions no-print">
+                <button type="button" id="back-to-edit-btn" class="btn secondary">Back to Edit</button>
+                <button type="button" id="print-btn" class="btn primary">🖨️ Print / Save PDF</button>
+            </div>
+            <div class="invoice-paper">
+                <div class="invoice-header">
+                    <div>
+                        <h1 id="print-company-name">Honeymoon Trip Planner</h1>
+                        <p id="print-company-address"></p>
+                        <p><strong>GSTIN:</strong> <span id="print-company-gstin"></span></p>
+                    </div>
+                    <div class="text-right">
+                        <h2>TAX INVOICE</h2>
+                        <p><strong>Date:</strong> <span id="print-invoice-date"></span></p>
+                        <p><strong>Invoice #:</strong> <span id="print-invoice-number"></span></p>
+                    </div>
+                </div>
+
+                <div class="invoice-parties">
+                    <div class="billed-to">
+                        <h3>Billed To:</h3>
+                        <p><strong id="print-client-name"></strong></p>
+                        <p id="print-client-address"></p>
+                    </div>
+                    <div class="trip-details">
+                        <h3>Destination:</h3>
+                        <p id="print-destination"></p>
+                    </div>
+                </div>
+
+                <table class="invoice-table">
+                    <thead>
+                        <tr>
+                            <th>S.No.</th>
+                            <th>Description</th>
+                            <th>Rate</th>
+                            <th>Qty</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="print-items-body">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+
+                <div class="invoice-totals-wrapper">
+                    <div class="invoice-totals">
+                        <div class="row"><span>Subtotal:</span> <span id="print-subtotal"></span></div>
+                        <div class="row" id="print-cgst-row"><span>CGST (<span id="print-cgst-rate"></span>%):</span> <span id="print-cgst"></span></div>
+                        <div class="row" id="print-sgst-row"><span>SGST (<span id="print-sgst-rate"></span>%):</span> <span id="print-sgst"></span></div>
+                        <div class="row hidden" id="print-igst-row"><span>IGST (<span id="print-igst-rate"></span>%):</span> <span id="print-igst"></span></div>
+                        <div class="row total"><span>Grand Total:</span> <span id="print-total"></span></div>
+                    </div>
+                </div>
+
+                <div class="amount-in-words">
+                    <p><strong>Amount in words:</strong> <span id="print-amount-words"></span></p>
+                </div>
+
+                <div class="invoice-footer">
+                    <p>Thank you for choosing us for your romantic getaway!</p>
+                    <p>For <span id="print-sign-company">Honeymoon Trip Planner</span></p>
+                    <br><br>
+                    <p>Authorized Signatory</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Saved Invoices Section -->
+        <section id="saved-invoices" class="tab-content no-print">
+            <div class="card">
+                <h2>Saved Invoices</h2>
+                <div id="saved-invoices-list" class="saved-list">
+                    <!-- Populated by JS -->
+                    <p class="empty-state">No saved invoices yet.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Settings Section -->
+        <section id="settings" class="tab-content no-print">
+            <div class="card">
+                <h2>Company Profile</h2>
+                <form id="settings-form">
+                    <div class="form-group">
+                        <label for="company-name">Business Name</label>
+                        <input type="text" id="company-name" value="Honeymoon Trip Planner" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="company-address">Business Address</label>
+                        <textarea id="company-address"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="company-gstin">GSTIN</label>
+                        <input type="text" id="company-gstin">
+                    </div>
+                    <button type="submit" class="btn primary">Save Settings</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>Data Backup & Restore</h2>
+                <p class="text-muted">Save your data to a file, or restore from a previous backup. All data is kept securely on your device.</p>
+                <div class="actions">
+                    <button type="button" id="backup-btn" class="btn secondary">📥 Export Backup</button>
+                    <label for="restore-file" class="btn secondary file-label">📤 Import Backup</label>
+                    <input type="file" id="restore-file" accept=".json" class="hidden-input">
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="app-footer no-print">
+        <p>Made by Ujjwal</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "GST Trip Bill Maker",
+  "short_name": "Trip Bill",
+  "description": "Generates professional GST invoices for honeymoon trip packages.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f9f9fc",
+  "theme_color": "#1A237E",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    }
+  ]
+}
