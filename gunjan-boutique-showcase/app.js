@@ -1,13 +1,13 @@
 // Mock Data Store
 const products = [
-    { id: 1, title: 'Royal Maroon Lehenga', category: 'lehengas', price: '₹45,000', desc: 'Exquisite bridal lehenga with heavy zari work.', featured: true },
-    { id: 2, title: 'Emerald Silk Saree', category: 'sarees', price: '₹22,000', desc: 'Pure Kanjeevaram silk saree in deep emerald green.', featured: true },
-    { id: 3, title: 'Golden Zardosi Kurti', category: 'kurtis', price: '₹8,500', desc: 'Elegant party wear kurti with intricate zardosi details.', featured: false },
-    { id: 4, title: 'Midnight Blue Gown', category: 'indo-western', price: '₹32,000', desc: 'Contemporary indo-western gown for reception evenings.', featured: true },
-    { id: 5, title: 'Pastel Floral Lehenga', category: 'lehengas', price: '₹38,000', desc: 'Lightweight organza lehenga perfect for sangeet.', featured: false },
-    { id: 6, title: 'Classic Banarasi Saree', category: 'sarees', price: '₹18,000', desc: 'Traditional red banarasi saree with gold motifs.', featured: false },
-    { id: 7, title: 'Ivory Peplum Kurti Set', category: 'kurtis', price: '₹12,000', desc: 'Modern peplum style kurti with dhoti pants.', featured: false },
-    { id: 8, title: 'Velvet Draped Dress', category: 'indo-western', price: '₹25,000', desc: 'Luxurious velvet dress with fusion draping.', featured: false }
+    { id: 1, title: 'Royal Maroon Lehenga', category: 'lehengas', originalPrice: '₹55,000', price: '₹45,000', desc: 'Exquisite bridal lehenga with heavy zari work.', featured: true },
+    { id: 2, title: 'Emerald Silk Saree', category: 'sarees', originalPrice: '₹28,000', price: '₹22,000', desc: 'Pure Kanjeevaram silk saree in deep emerald green.', featured: true },
+    { id: 3, title: 'Golden Zardosi Kurti', category: 'kurtis', originalPrice: '₹10,500', price: '₹8,500', desc: 'Elegant party wear kurti with intricate zardosi details.', featured: false },
+    { id: 4, title: 'Midnight Blue Gown', category: 'indo-western', originalPrice: '₹38,000', price: '₹32,000', desc: 'Contemporary indo-western gown for reception evenings.', featured: true },
+    { id: 5, title: 'Pastel Floral Lehenga', category: 'lehengas', originalPrice: '₹45,000', price: '₹38,000', desc: 'Lightweight organza lehenga perfect for sangeet.', featured: false },
+    { id: 6, title: 'Classic Banarasi Saree', category: 'sarees', originalPrice: '₹24,000', price: '₹18,000', desc: 'Traditional red banarasi saree with gold motifs.', featured: false },
+    { id: 7, title: 'Ivory Peplum Kurti Set', category: 'kurtis', originalPrice: '₹15,000', price: '₹12,000', desc: 'Modern peplum style kurti with dhoti pants.', featured: false },
+    { id: 8, title: 'Velvet Draped Dress', category: 'indo-western', originalPrice: '₹32,000', price: '₹25,000', desc: 'Luxurious velvet dress with fusion draping.', featured: false }
 ];
 
 const testimonials = [
@@ -92,7 +92,7 @@ function createProductCard(product) {
         <img src="${generateSVG(product.title)}" alt="${product.title}" class="product-image" loading="lazy">
         <div class="product-info">
             <h3 class="product-title">${product.title}</h3>
-            <p class="product-price">${product.price}</p>
+            <p class="product-price"><span class="original-price">${product.originalPrice}</span> ${product.price}</p>
             <button class="btn-primary" style="margin-top: 10px; width: 100%;" data-route="product" data-id="${product.id}">View Details</button>
         </div>
     `;
@@ -101,6 +101,27 @@ function createProductCard(product) {
 
 // Initialize Home Screen
 function initHome() {
+    // Populate category SVGs
+    document.getElementById('svg-lehengas').innerHTML = `<img src="${generateSVG('Lehengas')}" alt="Lehengas">`;
+    document.getElementById('svg-sarees').innerHTML = `<img src="${generateSVG('Sarees')}" alt="Sarees">`;
+    document.getElementById('svg-kurtis').innerHTML = `<img src="${generateSVG('Kurtis')}" alt="Kurtis">`;
+    document.getElementById('svg-indo-western').innerHTML = `<img src="${generateSVG('Indo-Western')}" alt="Indo-Western">`;
+
+    // Category click listeners
+    document.querySelectorAll('.category-circle').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const filter = link.dataset.filter;
+            // Update filter buttons
+            filterBtns.forEach(b => b.classList.remove('active'));
+            const targetBtn = document.querySelector(`.filter-btn[data-filter="${filter}"]`);
+            if(targetBtn) targetBtn.classList.add('active');
+
+            initCollection(filter);
+            navigateTo('collection');
+        });
+    });
+
     const featured = products.filter(p => p.featured);
     homeFeaturedGrid.innerHTML = '';
     featured.forEach(product => {
@@ -159,7 +180,7 @@ function renderProductDetail(id) {
         </div>
         <div class="product-detail-info">
             <h2>${product.title}</h2>
-            <p class="product-detail-price">${product.price}</p>
+            <p class="product-detail-price"><span class="original-price">${product.originalPrice}</span> ${product.price}</p>
             <p class="product-detail-desc">${product.desc}</p>
             <p style="color: var(--color-text-muted); margin-bottom: var(--spacing-md);">Category: <span style="text-transform: capitalize;">${product.category.replace('-', ' ')}</span></p>
             <a href="${whatsappLink}" target="_blank" class="btn-whatsapp">
@@ -181,5 +202,13 @@ navigateTo('home');
 homeFeaturedGrid.querySelectorAll('[data-route="product"]').forEach(btn => {
     btn.addEventListener('click', (e) => {
         navigateTo('product', btn.dataset.id);
+    });
+});
+
+// Footer Navigation Links
+document.querySelectorAll('.footer-links a[data-route]').forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        navigateTo(link.dataset.route);
     });
 });
