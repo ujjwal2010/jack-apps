@@ -1,0 +1,16 @@
+{
+  "name": "Gunjan Boutique Showcase",
+  "short_name": "Gunjan Boutique",
+  "description": "A luxury fashion boutique showcasing ethnic and designer collections.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
